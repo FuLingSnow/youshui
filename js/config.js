@@ -1,4 +1,4 @@
-export const BACKEND_ENABLED = false;
+export const BACKEND_ENABLED = true;
 export const API_BASE = BACKEND_ENABLED ? 'https://api.flyzm.online' : '';
 export const DEFAULT_HOST = 'flyzm.online';
 export const DEFAULT_PORT = 25565;
