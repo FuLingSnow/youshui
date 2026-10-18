@@ -24,8 +24,8 @@ export const SUBWORLDS = [
 ];
 
 export const DONORS = [
-  { qq: '768289964', qqq: 4.86 },
-  { qq: '313298737', qqq: 0.1 },
+  { qq: '768289964', qqq: 1 },
+  { qq: '313298737', qqq: 2 },
 ];
 
 export const NEWS = [

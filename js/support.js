@@ -15,7 +15,7 @@ export function renderSupport() {
   const list = $('donor-list');
   if (!list) return;
   list.innerHTML = '';
-  const donors = [...DONORS].sort((a, b) => (b.qqq || 0) - (a.qqq || 0));
+  const donors = [...DONORS].sort((a, b) => (a.qqq || 0) - (b.qqq || 0));
   donors.forEach((d) => {
     const item = document.createElement('div');
     item.className = 'flex flex-col items-center gap-2 p-3.5 rounded-2xl bg-white/5 border border-white/10 transition hover:border-amber-400/30 hover:bg-white/10';
