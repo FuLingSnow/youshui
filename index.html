@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>悠水小筑 - 我的世界MC服务器状态查询与游玩指南</title>
+  <meta name="description" content="悠水小筑是一个我的世界（Minecraft）服务器聚合站，提供MC服务器在线状态、延迟、在线人数实时查询，以及Java版/基岩版入服教程、模组服介绍、更新公告等一站式游玩指南。" />
+  <meta name="keywords" content="悠水小筑,我的世界,我的世界服务器,MC服务器,MC服务器状态查询,Minecraft,基岩版,Java版,我的世界入服教程,模组服,我的世界更新公告,MC服务器在线人数" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="悠水小筑" />
+  <link rel="canonical" href="https://flyzm.online/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="悠水小筑 - 我的世界MC服务器状态查询与游玩指南" />
+  <meta property="og:description" content="我的世界（Minecraft）服务器状态实时查询与游玩指南，支持Java版/基岩版，含入服教程、模组服介绍、更新公告。" />
+  <meta property="og:url" content="https://flyzm.online/" />
+  <meta property="og:site_name" content="悠水小筑" />
+  <meta name="theme-color" content="#070b16" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <script src="js/tailwind.js"></script>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/glass.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+  <link rel="stylesheet" href="css/starfield.css" />
+</head>
+<body class="min-h-screen text-slate-200 antialiased overflow-x-hidden bg-[#070b16] flex flex-col">
+
+  <canvas id="starfield" aria-hidden="true"></canvas>
+
+  <div class="fixed inset-0 -z-10 pointer-events-none" aria-hidden="true">
+    <div class="absolute -top-40 -left-40 w-[560px] h-[560px] rounded-full bg-cyan-500/20 blur-[130px]"></div>
+    <div class="absolute top-1/3 -right-40 w-[520px] h-[520px] rounded-full bg-violet-500/20 blur-[130px]"></div>
+    <div class="absolute bottom-0 left-1/4 w-[420px] h-[420px] rounded-full bg-sky-500/10 blur-[130px]"></div>
+  </div>
+
+  <nav class="fixed top-0 inset-x-0 z-50 glass border-x-0 border-t-0">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="#/" class="flex items-center gap-2.5">
+        <img src="favicon.ico" alt="悠水小筑" class="w-8 h-8 rounded-lg shadow-[0_0_16px_rgba(34,211,238,.4)]" />
+        <span class="text-white font-bold tracking-wide">悠水小筑</span>
+      </a>
+
+      <div class="hidden md:flex items-center gap-1">
+        <a href="#/" data-route="home" class="nav-link">主页</a>
+        <a href="#/monitor" data-route="monitor" class="nav-link" data-backend>状态监控</a>
+        <a href="#/news" data-route="news" class="nav-link">更新公告</a>
+        <a href="#/guide" data-route="guide" class="nav-link">帮助指南</a>
+        <a href="#/mods" data-route="mods" class="nav-link">模组服</a>
+        <a href="#/support" data-route="support" class="nav-link">支持我们</a>
+      </div>
+
+      <button id="menu-btn" type="button" aria-label="菜单" aria-expanded="false"
+              class="md:hidden w-10 h-10 rounded-xl glass-soft flex items-center justify-center text-xl text-slate-200 transition hover:text-white">
+        <span id="menu-icon">☰</span>
+      </button>
+    </div>
+
+    <div id="mobile-menu" hidden class="md:hidden glass border-x-0 border-t-0">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col">
+        <a href="#/" data-route="home" class="nav-link w-full">🏠 主页</a>
+        <a href="#/monitor" data-route="monitor" class="nav-link w-full" data-backend>📡 状态监控</a>
+        <a href="#/news" data-route="news" class="nav-link w-full">📰 更新公告</a>
+        <a href="#/guide" data-route="guide" class="nav-link w-full">📖 帮助指南</a>
+        <a href="#/mods" data-route="mods" class="nav-link w-full">🧩 模组服</a>
+        <a href="#/support" data-route="support" class="nav-link w-full">🤝 支持我们</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-1">
+
+    <section id="view-home" class="view min-h-full">
+      <div class="max-w-6xl mx-auto w-full px-4 py-16 md:py-24">
+        <div class="text-center">
+          <h1 class="text-5xl md:text-7xl font-bold bg-gradient-to-r from-cyan-300 via-sky-300 to-violet-300 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(34,211,238,.25)]">
+            悠水小筑
+          </h1>
+          <div class="mt-4 flex items-center justify-center gap-2 flex-wrap">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs md:text-sm font-medium text-emerald-200 bg-emerald-500/15 border border-emerald-400/30 backdrop-blur">
+              💚 纯公益服务器
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs md:text-sm font-medium text-cyan-200 bg-cyan-500/15 border border-cyan-400/30 backdrop-blur">
+              ✨ 长期运营
+            </span>
+            <div id="home-server-badge" data-backend class="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs text-slate-300">
+              <span id="home-badge-dot" class="w-2 h-2 rounded-full bg-slate-500 animate-pulse"></span>
+              <span id="home-badge-text">正在获取服务器状态…</span>
+            </div>
+            <span id="home-peak-badge" data-backend class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs md:text-sm font-medium text-amber-200 bg-amber-500/15 border border-amber-400/30 backdrop-blur">
+              📈 历史峰值 · <span id="home-peak-value">--</span>
+            </span>
+          </div>
+          <p class="mt-5 text-sm md:text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
+            一个温馨的 Minecraft 生存服务器社区，支持 <span data-ver="range"></span> 跨版本连接。
+            四服互联，浮域空岛、地皮城邦、生电工坊……多种玩法，等你来探索。
+          </p>
+        </div>
+
+        <div class="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="glass rounded-2xl p-5 card-hover flex flex-col">
+            <div class="flex items-center justify-between gap-2">
+              <div class="text-xs text-slate-400 flex items-center gap-1.5">🌐 服务器 IP</div>
+              <a href="#/guide" class="text-xs text-cyan-300 hover:text-cyan-200 transition whitespace-nowrap">无法连接？</a>
+            </div>
+            <div id="home-server-ip" class="mt-2 space-y-1 flex-1"></div>
+          </div>
+          <div class="glass rounded-2xl p-5 card-hover flex flex-col">
+            <div class="flex items-center justify-between gap-2">
+              <div class="text-xs text-slate-400 flex items-center gap-1.5">📦 推荐客户端版本</div>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gradient-to-r from-cyan-500/20 to-violet-500/20 border border-cyan-400/20 text-[10px] font-semibold tracking-wide text-cyan-300">推荐</span>
+            </div>
+            <div class="mt-1.5 text-white font-semibold text-lg" data-ver="recommended"></div>
+            <p class="mt-1 text-xs text-slate-500">支持 <span data-ver="range"></span> 跨版本连接</p>
+            <div class="mt-3 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-400/20 text-xs text-amber-200 leading-relaxed">优先使用 <span data-ver="recommended"></span>，低版本会出现方块物品异常替换</div>
+            <a href="#/guide?a=gameplay" class="mt-auto pt-3 text-xs text-cyan-300 hover:text-cyan-200 transition">查看入服教程 →</a>
+          </div>
+          <div class="glass rounded-2xl p-5 card-hover flex flex-col">
+            <div class="text-xs text-slate-400 flex items-center gap-1.5">🗺️ 服务器数量</div>
+            <div class="mt-1.5 text-white font-semibold text-lg"><span id="home-server-count">4</span> 个子服</div>
+            <div id="home-subworld-list" class="mt-2 flex flex-wrap gap-1.5 content-start"></div>
+            <p class="mt-auto pt-3 text-xs text-slate-500 leading-relaxed">进入大厅打开菜单，点击即可进入对应子服</p>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4" data-backend>
+          <div class="glass rounded-2xl p-5 lg:col-span-2">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="text-xs text-slate-400 flex items-center gap-1.5">📈 近一天在线趋势</div>
+              <div class="text-[11px] text-slate-500">每分钟一个采样点</div>
+            </div>
+            <div id="home-trend-chart" class="mt-3 w-full h-44"></div>
+            <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500">
+              <span id="home-trend-stat">加载中…</span>
+              <span>共 <span id="home-trend-count">0</span> 个采样点</span>
+            </div>
+          </div>
+          <div class="glass rounded-2xl p-5">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="text-xs text-slate-400 flex items-center gap-1.5">👥 近一周活跃玩家</div>
+              <div class="text-[11px] text-slate-500">登录 ≥ 3 天</div>
+            </div>
+            <div id="home-week-brief" class="mt-2 text-[11px] text-slate-500">正在统计本周玩家…</div>
+            <ul id="home-active-list" class="mt-2 space-y-1.5 max-h-44 overflow-auto pr-1 text-sm"></ul>
+            <div id="home-active-empty" class="mt-2 text-xs text-slate-500 hidden">暂无符合条件的数据</div>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4" data-backend>
+          <div class="glass rounded-2xl p-5 lg:col-span-2">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="text-xs text-slate-400 flex items-center gap-1.5">🔥 活跃时段分布</div>
+              <div class="text-[11px] text-slate-500">近 30 天 · 平均在线人数</div>
+            </div>
+            <div id="home-heatmap-note" class="mt-1.5 text-[11px] text-slate-500"></div>
+            <div id="home-heatmap-chart" class="mt-3 w-full overflow-x-auto"></div>
+            <div class="mt-5 flex items-center justify-between gap-2 flex-wrap">
+              <div class="text-xs text-slate-400 flex items-center gap-1.5">📅 逐日在线峰值</div>
+              <div id="home-daily-note" class="text-[11px] text-slate-500">统计中…</div>
+            </div>
+            <div id="home-daily-chart" class="mt-2 w-full overflow-x-auto"></div>
+          </div>
+          <div class="glass rounded-2xl p-5">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="text-xs text-slate-400 flex items-center gap-1.5">🧱 玩家墙</div>
+              <div class="text-[11px] text-slate-500">按活跃天数排序</div>
+            </div>
+            <div class="mt-2 text-[11px] text-slate-500">近 30 天累计 <span id="home-wall-total" class="text-cyan-300/90 font-semibold">统计中…</span> 位玩家留下足迹</div>
+            <div id="home-wall-grid" class="mt-3 flex flex-wrap gap-1.5 max-h-64 overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+
+        <div class="mt-16">
+          <div class="mb-8">
+            <div class="flex items-center gap-4">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent to-white/10"></div>
+              <h2 class="text-2xl font-bold text-white">玩法介绍</h2>
+              <div class="flex-1 h-px bg-gradient-to-l from-transparent to-white/10"></div>
+            </div>
+            <p class="mt-2 text-sm text-slate-400 text-center">目前服务器支持以下功能</p>
+          </div>
+          <div class="glass rounded-2xl p-6 md:p-8">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 text-sm">
+              <a href="#/guide?a=gameplay" class="rounded-xl glass-soft p-4 text-center gameplay-tile">
+                <p class="text-2xl">🏰</p>
+                <p class="mt-2 text-white font-medium">地下城</p>
+                <p class="mt-0.5 text-xs text-slate-400">数量 20+</p>
+              </a>
+              <a href="#/guide?a=gameplay" class="rounded-xl glass-soft p-4 text-center gameplay-tile">
+                <p class="text-2xl">🗼</p>
+                <p class="mt-2 text-white font-medium">塔防地图</p>
+                <p class="mt-0.5 text-xs text-slate-400">数量 5+</p>
+              </a>
+              <a href="#/guide?a=gameplay" class="rounded-xl glass-soft p-4 text-center gameplay-tile">
+                <p class="text-2xl">🏗️</p>
+                <p class="mt-2 text-white font-medium">新建筑结构</p>
+                <p class="mt-0.5 text-xs text-slate-400">数量 300+</p>
+              </a>
+              <a href="#/guide?a=gameplay" class="rounded-xl glass-soft p-4 text-center gameplay-tile">
+                <p class="text-2xl">⚡</p>
+                <p class="mt-2 text-white font-medium">生电服</p>
+                <p class="mt-0.5 text-xs text-slate-400">红石自动化</p>
+              </a>
+              <a href="#/guide?a=gameplay" class="rounded-xl glass-soft p-4 text-center gameplay-tile">
+                <p class="text-2xl">🎮</p>
+                <p class="mt-2 text-white font-medium">游戏服</p>
+                <p class="mt-0.5 text-xs text-slate-400">多种小游戏</p>
+              </a>
+              <a href="#/guide?a=gameplay" class="rounded-xl glass-soft p-4 text-center gameplay-tile">
+                <p class="text-2xl">🎁</p>
+                <p class="mt-2 text-white font-medium">趣味抽奖</p>
+                <p class="mt-0.5 text-xs text-slate-400">惊喜好礼</p>
+              </a>
+              <a href="#/guide?a=gameplay" class="rounded-xl glass-soft p-4 text-center gameplay-tile">
+                <p class="text-2xl">🏠</p>
+                <p class="mt-2 text-white font-medium">独立地皮</p>
+                <p class="mt-0.5 text-xs text-slate-400">专属领地</p>
+              </a>
+              <a href="#/guide?a=gameplay" class="rounded-xl glass-soft p-4 text-center gameplay-tile">
+                <p class="text-2xl">🏪</p>
+                <p class="mt-2 text-white font-medium">商店拍卖行</p>
+                <p class="mt-0.5 text-xs text-slate-400">自由交易</p>
+              </a>
+              <a href="#/guide?a=gameplay" class="rounded-xl glass-soft p-4 text-center gameplay-tile">
+                <p class="text-2xl">🎖️</p>
+                <p class="mt-2 text-white font-medium">称号签到</p>
+                <p class="mt-0.5 text-xs text-slate-400">每日打卡</p>
+              </a>
+              <a href="#/guide?a=gameplay" class="rounded-xl glass-soft p-4 text-center gameplay-tile">
+                <p class="text-2xl">🌌</p>
+                <p class="mt-2 text-white font-medium">狭域万象</p>
+                <p class="mt-0.5 text-xs text-slate-400">包罗万象</p>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-16">
+          <div>
+            <div class="flex items-center gap-4">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent to-white/10"></div>
+              <h2 class="text-2xl font-bold text-white">更新公告</h2>
+              <div class="flex-1 h-px bg-gradient-to-l from-transparent to-white/10"></div>
+            </div>
+            <p class="mt-2 text-sm text-slate-400 text-center">记录服务器每一次变化</p>
+          </div>
+          <div class="flex justify-end mt-2 mb-2">
+            <a href="#/news" class="inline-flex items-center gap-1 text-sm text-cyan-300 hover:text-cyan-200 transition">
+              查看全部
+              <span class="transition-transform group-hover:translate-x-0.5">→</span>
+            </a>
+          </div>
+          <div id="news-list" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch"></div>
+        </div>
+
+        <div class="mt-16">
+          <div class="mb-8">
+            <div class="flex items-center gap-4">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent to-white/10"></div>
+              <h2 class="text-2xl font-bold text-white">服务器团队</h2>
+              <div class="flex-1 h-px bg-gradient-to-l from-transparent to-white/10"></div>
+            </div>
+            <p class="mt-2 text-sm text-slate-400 text-center">感恩相遇，一路同行</p>
+          </div>
+          <div id="team-list" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch"></div>
+        </div>
+
+        <div class="mt-16">
+          <div class="mb-8">
+            <div class="flex items-center gap-4">
+              <div class="flex-1 h-px bg-gradient-to-r from-transparent to-white/10"></div>
+              <h2 class="text-2xl font-bold text-white">快速开始</h2>
+              <div class="flex-1 h-px bg-gradient-to-l from-transparent to-white/10"></div>
+            </div>
+            <p class="mt-2 text-sm text-slate-400 text-center">三步加入悠水小筑</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="glass rounded-2xl p-6 card-hover text-center">
+              <div class="mx-auto w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-2xl">📥</div>
+              <div class="mt-4 text-sm font-semibold text-white">下载客户端</div>
+              <div class="mt-1.5 text-xs text-slate-400 leading-relaxed">获取推荐版本 <span data-ver="recommended"></span>，支持 <span data-ver="range"></span> 跨版本</div>
+            </div>
+            <div class="glass rounded-2xl p-6 card-hover text-center">
+              <div class="mx-auto w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-400/20 flex items-center justify-center text-2xl">✍️</div>
+              <div class="mt-4 text-sm font-semibold text-white">注册登录(正版免登录)</div>
+              <div class="mt-1.5 text-xs text-slate-400 leading-relaxed">进入登录驿站完成账号注册，再前往主域开始冒险</div>
+            </div>
+            <div class="glass rounded-2xl p-6 card-hover text-center">
+              <div class="mx-auto w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-400/20 flex items-center justify-center text-2xl">⛏️</div>
+              <div class="mt-4 text-sm font-semibold text-white">开始冒险</div>
+              <div class="mt-1.5 text-xs text-slate-400 leading-relaxed">加入 QQ 群认识伙伴，在悠水小筑安家立业</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-16 glass rounded-3xl p-6 md:p-10 text-center relative overflow-hidden">
+          <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-violet-500/10 blur-3xl pointer-events-none"></div>
+          <h2 class="relative text-xl md:text-2xl font-bold text-white">加入悠水小筑，开启你的方块之旅</h2>
+          <p class="relative mt-2 text-sm text-slate-400">遇到问题欢迎联系管理，或加入玩家交流群一起玩</p>
+          <div class="relative mt-6 flex flex-wrap items-center justify-center gap-3.5">
+            <a href="https://qm.qq.com/q/nUTZ02uTb" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-cyan-500/80 to-sky-500/80 hover:from-cyan-400/90 hover:to-sky-400/90 border border-white/10 transition-all duration-300 hover:shadow-[0_0_20px_rgba(34,211,238,.35)]">
+              👥 加入玩家群
+            </a>
+            <a href="#/support"
+               class="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition">
+              🤝 支持我们
+            </a>
+            <a href="https://github.com/FuLingSnow" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 015.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.42-2.7 5.39-5.27 5.68.41.35.78 1.05.78 2.12 0 1.53-.01 2.76-.01 3.13 0 .31.21.67.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+              GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-monitor" data-backend class="view py-24 md:py-28">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="mb-8">
+          <div id="header-badge" class="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-xs text-slate-300">
+            <span id="header-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+            <span id="header-badge-text">正在连接后端服务…</span>
+          </div>
+          <div class="mt-4 flex items-center gap-3">
+            <h2 class="text-2xl md:text-3xl font-bold text-white">服务器状态监控</h2>
+            <div class="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent"></div>
+          </div>
+        </div>
+
+        <div class="glass rounded-3xl p-5 md:p-8 card-hover">
+          <div class="mb-5 flex flex-wrap items-center gap-2">
+            <span class="text-xs text-slate-400 shrink-0">快捷选择</span>
+            <div id="quick-servers" class="flex flex-wrap gap-2"></div>
+          </div>
+          <form id="status-form" autocomplete="off" class="grid grid-cols-1 sm:grid-cols-[1fr_115px_125px_auto] gap-3 mb-7">
+            <input id="input-host" type="text" value="flyzm.online" spellcheck="false"
+                   class="glass-soft rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 transition"
+                   placeholder="服务器地址，如 flyzm.online" />
+            <input id="input-port" type="number" value="25565" min="1" max="65535"
+                   class="glass-soft rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 transition"
+                   placeholder="端口 25565" />
+            <select id="input-protocol"
+                    class="glass-soft rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 transition cursor-pointer [&>option]:text-slate-800">
+              <option value="auto" selected>自动</option>
+              <option value="java">Java 版</option>
+              <option value="bedrock">基岩版</option>
+            </select>
+            <button id="btn-query" type="submit"
+                    class="rounded-xl px-7 py-3 text-sm font-medium text-white bg-gradient-to-r from-cyan-500/80 to-violet-500/80 hover:from-cyan-400/90 hover:to-violet-400/90 border border-white/10 transition-all duration-300 hover:shadow-[0_0_24px_rgba(34,211,238,.35)] disabled:opacity-50 disabled:cursor-not-allowed">
+              查询状态
+            </button>
+          </form>
+
+          <div id="skeleton" hidden>
+            <div class="flex flex-col md:flex-row items-center gap-6">
+              <div class="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-white/10 animate-pulse shrink-0"></div>
+              <div class="flex-1 w-full space-y-3">
+                <div class="h-5 bg-white/10 animate-pulse rounded-lg w-3/4"></div>
+                <div class="h-4 bg-white/10 animate-pulse rounded-lg w-1/2"></div>
+                <div class="flex gap-2">
+                  <div class="h-7 bg-white/10 animate-pulse rounded-full w-24"></div>
+                  <div class="h-7 bg-white/10 animate-pulse rounded-full w-28"></div>
+                  <div class="h-7 bg-white/10 animate-pulse rounded-full w-20"></div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-7 space-y-3">
+              <div class="h-2.5 bg-white/10 animate-pulse rounded-full"></div>
+              <div class="h-6 bg-white/10 animate-pulse rounded-lg w-full"></div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
+                <div class="h-8 bg-white/10 animate-pulse rounded-full"></div>
+                <div class="h-8 bg-white/10 animate-pulse rounded-full"></div>
+                <div class="h-8 bg-white/10 animate-pulse rounded-full"></div>
+                <div class="h-8 bg-white/10 animate-pulse rounded-full"></div>
+                <div class="h-8 bg-white/10 animate-pulse rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="online-view" hidden>
+            <div class="flex flex-col md:flex-row items-center gap-6">
+              <div class="shrink-0">
+                <img id="server-icon" src="" alt="服务器图标" class="w-20 h-20 md:w-24 md:h-24 rounded-2xl border border-white/15 shadow-[0_0_24px_rgba(34,211,238,.2)] object-cover hidden" />
+                <div id="icon-fallback" class="w-20 h-20 md:w-24 md:h-24 rounded-2xl glass-soft flex items-center justify-center text-4xl">🎮</div>
+              </div>
+              <div class="flex-1 w-full text-center md:text-left">
+                <h3 id="server-motd" class="text-lg md:text-xl font-semibold text-white leading-snug"></h3>
+                <p class="mt-1.5 text-sm text-slate-400">
+                  服务器 IP：<span id="server-host" class="text-cyan-300 font-mono"></span>
+                  <span class="mx-1.5 text-slate-600">|</span>
+                  版本：<span id="server-protocol" class="inline-flex items-center px-2 py-0.5 rounded-md bg-gradient-to-r from-cyan-500/20 to-violet-500/20 border border-cyan-400/20 text-[10px] font-semibold tracking-wide text-cyan-300 align-middle mr-1.5">JAVA</span><span id="server-version" class="text-violet-300"></span>
+                </p>
+                <div class="mt-3.5 flex flex-wrap items-center justify-center md:justify-start gap-2.5">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs">
+                    <span id="status-dot" class="w-2.5 h-2.5 rounded-full"></span>
+                    <span id="status-text">在线</span>
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300">
+                    📶 延迟 <span id="server-latency" class="text-cyan-300 font-medium">--</span> ms
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300">
+                    👥 <span id="server-players" class="text-cyan-300 font-medium">0</span> / <span id="server-max" class="text-slate-400">0</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-7">
+              <div class="flex justify-between text-xs text-slate-400 mb-2">
+                <span>在线人数</span>
+                <span><span id="bar-players" class="text-cyan-300 font-medium">0</span> / <span id="bar-max" class="text-slate-400">0</span> 人</span>
+              </div>
+              <div class="h-2 rounded-full bg-white/10 overflow-hidden">
+                <div id="player-bar" class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-violet-400 transition-all duration-700" style="width:0%"></div>
+              </div>
+            </div>
+
+            <div class="mt-7">
+              <h4 class="text-sm text-slate-300 mb-3 flex items-center gap-2">
+                <span class="text-cyan-300">●</span> 在线玩家 <span id="player-count" class="text-xs text-slate-500">(0)</span>
+              </h4>
+              <div id="player-list" class="flex flex-wrap gap-2.5"></div>
+            </div>
+
+            <p id="query-meta" class="mt-6 text-[11px] text-slate-600"></p>
+          </div>
+
+          <div id="error-view" hidden>
+            <div class="flex flex-col items-center text-center py-10 px-4">
+              <div id="error-icon" class="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-400/20 flex items-center justify-center text-3xl mb-4">⚠️</div>
+              <h3 id="error-title" class="text-lg font-semibold text-white">服务器离线</h3>
+              <p id="error-message" class="mt-2 max-w-md text-sm text-slate-400 leading-relaxed"></p>
+              <button id="btn-retry" type="button" class="mt-5 rounded-xl px-5 py-2.5 text-sm bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                重新查询
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="view-guide" class="view py-24 md:py-28">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="mb-10">
+          <div class="flex items-center gap-4">
+            <div class="flex-1 h-px bg-gradient-to-r from-transparent to-white/10"></div>
+            <h2 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-300 via-sky-300 to-violet-300 bg-clip-text text-transparent">
+              悠水小筑 · 游玩指南
+            </h2>
+            <div class="flex-1 h-px bg-gradient-to-l from-transparent to-white/10"></div>
+          </div>
+          <p class="mt-2 text-sm text-slate-400 text-center">游戏指南 · 入服指南 · 常见问题 &amp; 避坑</p>
+        </div>
+
+        <div id="gameplay" class="mb-14 scroll-mt-24">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/20 flex items-center justify-center text-xl shrink-0">🎮</span>
+            <div>
+              <h3 class="text-2xl font-bold text-white">游戏指南</h3>
+              <p class="text-xs text-slate-500 mt-0.5">四大子服玩法介绍</p>
+            </div>
+            <div class="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent"></div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+
+            <div class="glass rounded-3xl p-6 md:p-7 card-hover flex flex-col">
+              <div class="flex items-center gap-3">
+                <span class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-2xl shrink-0">⚡</span>
+                <div>
+                  <h4 class="text-lg font-bold text-white">生电工坊</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">红石自动化 · Lophine 核心</p>
+                </div>
+                <span class="ml-auto px-2.5 py-0.5 rounded-full text-[11px] font-medium text-cyan-200 bg-cyan-500/15 border border-cyan-400/30 shrink-0">技术服</span>
+              </div>
+              <p class="mt-4 text-sm text-slate-400 leading-relaxed">
+                为红石而生的自动化工坊。采用 <span class="text-cyan-300 font-medium">Lophine 服务端核心</span>——针对红石高负载场景做了深度优化，对高频红石信号、活塞阵列、漏斗物流、实体运算等都有相应调优，让大型机器阵列运行得更稳、更顺畅。
+              </p>
+              <ul class="mt-4 space-y-2 text-sm text-slate-300 leading-relaxed">
+                <li class="flex gap-2.5"><span class="text-cyan-300 shrink-0">▸</span>高频红石与活塞阵列优化，机器运转更顺畅</li>
+                <li class="flex gap-2.5"><span class="text-cyan-300 shrink-0">▸</span>漏斗物流深度调优，全自动生产线有效减少卡顿</li>
+                <li class="flex gap-2.5"><span class="text-cyan-300 shrink-0">▸</span>定时存档备份，安心造机不担心丢档</li>
+              </ul>
+              <p class="mt-auto pt-4 text-sm text-slate-500 leading-relaxed">不必追求极限的宣言——只要用心设计，工坊都愿意陪你把它跑起来。</p>
+            </div>
+
+            <div class="glass rounded-3xl p-6 md:p-7 card-hover flex flex-col">
+              <div class="flex items-center gap-3">
+                <span class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-400/20 flex items-center justify-center text-2xl shrink-0">🏰</span>
+                <div>
+                  <h4 class="text-lg font-bold text-white">主域服</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">主世界生存 · 玩法丰富</p>
+                </div>
+                <span class="ml-auto px-2.5 py-0.5 rounded-full text-[11px] font-medium text-amber-200 bg-amber-500/15 border border-amber-400/30 shrink-0">生存服</span>
+              </div>
+              <p class="mt-4 text-sm text-slate-400 leading-relaxed">
+                丰富多彩的生存大世界——20+ 地下城等你挑战、5+ 塔防地图考验谋略、300+ 全新建筑结构点缀天地，惊喜远不止于此。
+              </p>
+              <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-300">
+                <span class="flex gap-2 items-center"><span class="text-amber-300 shrink-0">🏰</span>地下城副本 <b class="text-white">20+</b></span>
+                <span class="flex gap-2 items-center"><span class="text-amber-300 shrink-0">🛡️</span>塔防地图 <b class="text-white">5+</b></span>
+                <span class="flex gap-2 items-center"><span class="text-amber-300 shrink-0">🏗️</span>新建筑结构 <b class="text-white">300+</b></span>
+                <span class="flex gap-2 items-center"><span class="text-amber-300 shrink-0">🎁</span>趣味抽奖</span>
+                <span class="flex gap-2 items-center"><span class="text-amber-300 shrink-0">🏠</span>独立地皮</span>
+                <span class="flex gap-2 items-center"><span class="text-amber-300 shrink-0">🛒</span>商店 · 拍卖行</span>
+                <span class="flex gap-2 items-center"><span class="text-amber-300 shrink-0">🏷️</span>称号 · 签到</span>
+                <span class="flex gap-2 items-center"><span class="text-amber-300 shrink-0">✨</span>粒子特效</span>
+              </div>
+              <p class="mt-auto pt-4 text-sm text-slate-500 leading-relaxed">安家、打宝、经商、扮靓——主域之下，玩法由你定义。</p>
+            </div>
+
+            <div class="glass rounded-3xl p-6 md:p-7 card-hover lg:col-span-2">
+              <div class="flex flex-col sm:flex-row sm:items-center gap-5">
+                <span class="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-400/20 flex items-center justify-center text-3xl shrink-0">🛝</span>
+                <div class="flex-1 min-w-0">
+                  <div class="flex flex-wrap items-center gap-2.5">
+                    <h4 class="text-lg font-bold text-white">游乐幻境</h4>
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium text-violet-200 bg-violet-500/15 border border-violet-400/30">迷你游戏服</span>
+                  </div>
+                  <p class="mt-2 text-sm text-slate-400 leading-relaxed">
+                    本服小游戏地图直接采用开源项目 <span class="text-violet-300 font-medium">Map-MiniGames</span>（github.com/wifi-left/Map-MiniGames）搭建。在此向作者及每一位开源贡献者致以诚挚的敬意与感谢——正因他们的无私分享，这片迷你游戏天地才能呈现在大家面前。经典玩法原汁原味，拉上朋友一起开黑吧！
+                  </p>
+                </div>
+                <a href="https://github.com/wifi-left/Map-MiniGames" target="_blank" rel="noopener"
+                   class="shrink-0 inline-flex items-center gap-2 rounded-xl glass-soft px-4 py-2.5 text-sm text-white transition hover:bg-white/10">
+                  <svg class="w-4 h-4 text-slate-200" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 015.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.42-2.7 5.39-5.27 5.68.41.35.78 1.05.78 2.12 0 1.53-.01 2.76-.01 3.13 0 .31.21.67.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+                  GitHub
+                </a>
+              </div>
+            </div>
+
+            <div class="glass rounded-3xl p-6 md:p-7 card-hover lg:col-span-2">
+              <div class="flex items-center gap-3 mb-5">
+                <span class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-400/20 flex items-center justify-center text-2xl shrink-0">🌌</span>
+                <div>
+                  <h4 class="text-lg font-bold text-white">狭域万象</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">九大玩法领域 · 一服万象</p>
+                </div>
+                <span class="ml-auto px-2.5 py-0.5 rounded-full text-[11px] font-medium text-emerald-200 bg-emerald-500/15 border border-emerald-400/30 shrink-0">特色玩法服</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                <div class="rounded-2xl glass-soft p-4">
+                  <div class="flex items-center gap-2"><span class="text-lg shrink-0">☁️</span><h5 class="text-sm font-semibold text-white">浮域空岛</h5></div>
+                  <p class="mt-2 text-xs text-slate-400 leading-relaxed">悬浮于天空的岛屿群，在云端求生拓荒，俯瞰云海。</p>
+                </div>
+                <div class="rounded-2xl glass-soft p-4">
+                  <div class="flex items-center gap-2"><span class="text-lg shrink-0">🧱</span><h5 class="text-sm font-semibold text-white">源域空岛</h5></div>
+                  <p class="mt-2 text-xs text-slate-400 leading-relaxed">开局脚下仅有一块方块——一无所有，一切从零开始。</p>
+                </div>
+                <div class="rounded-2xl glass-soft p-4">
+                  <div class="flex items-center gap-2"><span class="text-lg shrink-0">☠️</span><h5 class="text-sm font-semibold text-white">蚀域酸屿</h5></div>
+                  <p class="mt-2 text-xs text-slate-400 leading-relaxed">酸性海洋环绕孤岛，酸雨腐蚀一切，扩张领地步步惊心。</p>
+                </div>
+                <div class="rounded-2xl glass-soft p-4">
+                  <div class="flex items-center gap-2"><span class="text-lg shrink-0">⛵</span><h5 class="text-sm font-semibold text-white">瀚域沧洋</h5></div>
+                  <p class="mt-2 text-xs text-slate-400 leading-relaxed">程序生成的无尽之海，NPC 贸易岛屿星罗棋布，一艇起家、低买高卖。</p>
+                </div>
+                <div class="rounded-2xl glass-soft p-4">
+                  <div class="flex items-center gap-2"><span class="text-lg shrink-0">🌀</span><h5 class="text-sm font-semibold text-white">环域墟疆</h5></div>
+                  <p class="mt-2 text-xs text-slate-400 leading-relaxed">始于一块魔法方块，升级即可环状解锁新区域，层级失落则领域再封。</p>
+                </div>
+                <div class="rounded-2xl glass-soft p-4">
+                  <div class="flex items-center gap-2"><span class="text-lg shrink-0">🚧</span><h5 class="text-sm font-semibold text-white">锢域启疆</h5></div>
+                  <p class="mt-2 text-xs text-slate-400 leading-relaxed">困于狭小空间，唯有完成进度方可逐步扩展，考验耐心与规划。</p>
+                </div>
+                <div class="rounded-2xl glass-soft p-4">
+                  <div class="flex items-center gap-2"><span class="text-lg shrink-0">🌊</span><h5 class="text-sm font-semibold text-white">泠域遗渊</h5></div>
+                  <p class="mt-2 text-xs text-slate-400 leading-relaxed">海难失事后的深洋求生，需如鲨鱼般永不停歇，携几件旧物深入海底。</p>
+                </div>
+                <div class="rounded-2xl glass-soft p-4">
+                  <div class="flex items-center gap-2"><span class="text-lg shrink-0">👁️</span><h5 class="text-sm font-semibold text-white">逆域颓墟</h5></div>
+                  <p class="mt-2 text-xs text-slate-400 leading-relaxed">现实被颠倒维度笼罩——以「上下颠倒的世界」取代下界，一场诡异生存。</p>
+                </div>
+                <div class="rounded-2xl glass-soft p-4">
+                  <div class="flex items-center gap-2"><span class="text-lg shrink-0">⛏️</span><h5 class="text-sm font-semibold text-white">岩域凿墟</h5></div>
+                  <p class="mt-2 text-xs text-slate-400 leading-relaxed">地下世界的生存赞歌，献给每个人内心深处的矮人之魂。</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="mb-14">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-xl shrink-0">📥</span>
+            <div>
+              <h3 class="text-2xl font-bold text-white">入服指南</h3>
+              <p class="text-xs text-slate-500 mt-0.5">新手从这里开始</p>
+            </div>
+            <div class="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent"></div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+          <div class="glass rounded-3xl p-6 md:p-8 card-hover lg:col-span-2">
+            <div class="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6">
+              <div class="flex items-start gap-4">
+                <span class="text-3xl md:text-4xl leading-none">📢</span>
+                <div class="flex-1">
+                  <h3 class="text-xl md:text-2xl font-bold text-white">悠水小筑服务器｜入服完整教程</h3>
+                  <div class="mt-5 space-y-3 text-sm md:text-[15px] leading-relaxed text-slate-300">
+                    <p class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span class="text-slate-400">服务器 IP：</span>
+                      <code data-srv="main" class="px-3 py-1 rounded-lg bg-cyan-500/10 border border-cyan-400/25 text-cyan-300 font-mono font-semibold">flyzm.online</code>
+                    </p>
+                    <p>✅ <span class="text-white font-medium">推荐客户端版本：<span data-ver="recommended"></span></span></p>
+                    <p>支持版本范围：<span class="text-white" data-ver="range"></span> 跨版本连接</p>
+                    <p class="px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-400/20 text-amber-200">
+                      ⚠️ 优先使用 <span data-ver="recommended"></span>，低版本会出现方块物品异常替换
+                    </p>
+                    <p class="text-cyan-200/90">进入大厅打开菜单点击即可进入对应服务器</p>
+                  </div>
+                </div>
+              </div>
+              <div class="rounded-2xl glass-soft p-5 flex flex-col justify-between gap-5">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl leading-none">💬</span>
+                  <p class="text-sm text-slate-300 leading-relaxed">如有疑问欢迎群内交流，也欢迎加入玩家社群一同体验。<br />建议先行阅读游玩指南，反馈问题时需提供相关现象与报错信息，便于高效协助排查，否则不允处理。</p>
+                </div>
+                <a href="https://qm.qq.com/q/nUTZ02uTb" target="_blank" rel="noopener"
+                   class="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-cyan-500/80 to-sky-500/80 hover:from-cyan-400/90 hover:to-sky-400/90 border border-white/10 transition-all duration-300 hover:shadow-[0_0_20px_rgba(34,211,238,.35)]">
+                  👥 加入玩家群
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass rounded-3xl p-6 md:p-7 card-hover">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-xl">🖥️</span>
+              电脑 Java 版
+            </h3>
+            <p class="mt-3 text-xs text-slate-400">▷ PCL2（Windows 推荐）/ HMCL / 官方启动器</p>
+            <ol class="mt-4 space-y-3 text-sm text-slate-300">
+              <li class="flex gap-3"><span class="w-5 h-5 shrink-0 rounded-full bg-cyan-500/15 border border-cyan-400/25 text-cyan-300 text-xs flex items-center justify-center font-semibold">1</span>下载 PCL2，安装游戏版本 <span class="text-white font-medium" data-ver="recommended"></span></li>
+              <li class="flex gap-3"><span class="w-5 h-5 shrink-0 rounded-full bg-cyan-500/15 border border-cyan-400/25 text-cyan-300 text-xs flex items-center justify-center font-semibold">2</span>账号：微软正版 / LittleSkin 外置登录 / 离线均可</li>
+              <li class="flex gap-3"><span class="w-5 h-5 shrink-0 rounded-full bg-cyan-500/15 border border-cyan-400/25 text-cyan-300 text-xs flex items-center justify-center font-semibold">3</span>多人游戏 → 添加服务器</li>
+            </ol>
+            <div class="mt-4 rounded-xl glass-soft p-4 space-y-2 text-sm">
+              <p class="text-slate-400">名称：<span class="text-white">悠水小筑</span></p>
+              <p class="text-slate-400">地址：<code data-srv="main" class="text-cyan-300 font-mono">flyzm.online</code></p>
+              <p class="text-slate-400">备用：<code data-srv="backup" class="text-cyan-300 font-mono">mc.flyzm.online:1</code><span class="text-slate-500">（连不上时使用）</span></p>
+            </div>
+          </div>
+
+          <div class="glass rounded-3xl p-6 md:p-7 card-hover">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-400/20 flex items-center justify-center text-xl">📱</span>
+              手机 Java 版 · FCL 启动器
+            </h3>
+            <ol class="mt-4 space-y-3 text-sm text-slate-300">
+              <li class="flex gap-3"><span class="w-5 h-5 shrink-0 rounded-full bg-violet-500/15 border border-violet-400/25 text-violet-300 text-xs flex items-center justify-center font-semibold">1</span>FCL 下载安装，下载版本 <span class="text-white font-medium" data-ver="recommended"></span></li>
+              <li class="flex gap-3"><span class="w-5 h-5 shrink-0 rounded-full bg-violet-500/15 border border-violet-400/25 text-violet-300 text-xs flex items-center justify-center font-semibold">2</span>账号：正版登录 / 外置登录，<span class="text-amber-300">角色名不要中文</span></li>
+              <li class="flex gap-3"><span class="w-5 h-5 shrink-0 rounded-full bg-violet-500/15 border border-violet-400/25 text-violet-300 text-xs flex items-center justify-center font-semibold">3</span>多人游戏添加服务器，地址填入 <code data-srv="main" class="text-cyan-300 font-mono">flyzm.online</code></li>
+            </ol>
+            <div class="mt-4 rounded-xl glass-soft p-4 space-y-2 text-sm">
+              <p class="text-slate-400">名称：<span class="text-white">悠水小筑</span></p>
+              <p class="text-slate-400">地址：<code data-srv="main" class="text-cyan-300 font-mono">flyzm.online</code></p>
+              <p class="text-slate-400">备用：<code data-srv="backup" class="text-cyan-300 font-mono">mc.flyzm.online:1</code><span class="text-slate-500">（连不上时使用）</span></p>
+            </div>
+          </div>
+
+          <div class="glass rounded-3xl p-6 md:p-7 card-hover">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-400/20 flex items-center justify-center text-xl">📱</span>
+              基岩版（手机 / Win 国际版）
+            </h3>
+            <ol class="mt-4 space-y-3 text-sm text-slate-300">
+              <li class="flex gap-3"><span class="w-5 h-5 shrink-0 rounded-full bg-emerald-500/15 border border-emerald-400/25 text-emerald-300 text-xs flex items-center justify-center font-semibold">1</span>添加外部服务器</li>
+            </ol>
+            <div class="mt-4 rounded-xl glass-soft p-4 space-y-2 text-sm">
+              <p class="text-slate-400">服务器名称：<span class="text-white">悠水小筑</span></p>
+              <p class="text-slate-400">地址：<code data-srv="bedrock" class="text-cyan-300 font-mono">mc.flyzm.online:2</code></p>
+            </div>
+          </div>
+
+          </div>
+        </div>
+
+        <div class="mb-14">
+          <div class="flex items-center gap-3 mb-6">
+            <span class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-400/20 flex items-center justify-center text-xl shrink-0">❗</span>
+            <div>
+              <h3 class="text-2xl font-bold text-white">常见问题 &amp; 避坑</h3>
+              <p class="text-xs text-slate-500 mt-0.5">遇到问题先看这里</p>
+            </div>
+            <div class="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent"></div>
+          </div>
+
+          <div class="glass rounded-3xl p-6 md:p-7 card-hover">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-10 gap-y-3">
+              <ul class="space-y-3 text-sm text-slate-300 leading-relaxed">
+                <li class="flex gap-2.5"><span class="text-rose-300 shrink-0">1.</span>外置登录（LittleSkin）角色名禁止中文，中文角色无法正常进服。</li>
+                <li class="flex gap-2.5"><span class="text-rose-300 shrink-0">2.</span>跨版本游玩部分方块、道具会显示异常，尽量使用最新版。</li>
+                <li class="flex gap-2.5"><span class="text-rose-300 shrink-0">3.</span>模组可以用，但禁止透视、矿图、作弊类模组。</li>
+              </ul>
+              <ul class="space-y-3 text-sm text-slate-300 leading-relaxed">
+                <li class="flex gap-2.5"><span class="text-rose-300 shrink-0">4.</span>非正版玩家进服后按照提示注册账号，记住你的登录密码。</li>
+                <li class="flex gap-2.5"><span class="text-rose-300 shrink-0">5.</span>反馈问题时请提供相关现象与报错完整信息，便于高效排查。</li>
+              </ul>
+            </div>
+            <div class="mt-5 rounded-xl bg-sky-500/10 border border-sky-400/20 p-4 text-sm text-sky-200/90 leading-relaxed">
+              📌 群内禁止刷屏、广告、引战，有问题群内提问，详细描述报错完整提示。<br />
+              <span class="text-white font-medium mt-1.5 inline-block">祝大家游玩愉快！</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="view-mods" class="view py-24 md:py-28">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="mb-10">
+          <div class="flex items-center gap-4">
+            <div class="flex-1 h-px bg-gradient-to-r from-transparent to-white/10"></div>
+            <h2 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-300 via-sky-300 to-violet-300 bg-clip-text text-transparent">
+              模组服
+            </h2>
+            <div class="flex-1 h-px bg-gradient-to-l from-transparent to-white/10"></div>
+          </div>
+          <p class="mt-2 text-sm text-slate-400 text-center">在原版玩法之上，解锁更多可能</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+          <div class="glass rounded-3xl p-6 md:p-7 card-hover lg:col-span-2">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-400/20 flex items-center justify-center text-xl">🧩</span>
+              什么是模组服
+            </h3>
+            <p class="mt-4 text-sm text-slate-300 leading-relaxed">
+              模组服（Modded Server）是安装了模组（Mod）的 Minecraft 服务器，在原生玩法之上新增机器、科技、冒险、农业等丰富内容，带来完全不同的生存与自动化体验。进入模组服需安装对应的整合包或模组，才能正常游玩。
+            </p>
+            <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <div class="rounded-xl glass-soft p-4">
+                <p class="text-violet-300 font-medium">🧪 科技自动化</p>
+                <p class="mt-1.5 text-slate-400 text-xs leading-relaxed">格雷科技、新星工程等整合包，体验从采矿到全自动产线的进阶乐趣。</p>
+              </div>
+              <div class="rounded-xl glass-soft p-4">
+                <p class="text-emerald-300 font-medium">🌾 冒险与经营</p>
+                <p class="mt-1.5 text-slate-400 text-xs leading-relaxed">龙冒、星露谷等玩法包，探索地牢、经营农庄，节奏轻松惬意。</p>
+              </div>
+              <div class="rounded-xl glass-soft p-4">
+                <p class="text-amber-300 font-medium">⚔️ 高难挑战</p>
+                <p class="mt-1.5 text-slate-400 text-xs leading-relaxed">ATM9 等大型整合包，内容量巨大，适合长期游玩与团队协作。</p>
+              </div>
+            </div>
+            <div class="mt-5 rounded-xl bg-amber-500/10 border border-amber-400/20 p-4 text-sm text-amber-200/90 leading-relaxed">
+              ⚠️ 目前<span class="text-white font-medium">暂无开放的模组服</span>，后续开放会第一时间在更新公告中通知，敬请期待。
+            </div>
+          </div>
+
+          <div class="glass rounded-3xl p-6 md:p-7 card-hover lg:col-span-2">
+            <h3 class="text-lg font-bold text-slate-300 flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-slate-500/10 border border-slate-400/20 flex items-center justify-center text-xl grayscale">📦</span>
+              已封存服务器（暂不开放）
+            </h3>
+            <p class="mt-3 text-xs text-slate-500">以下模组服已暂停开放，历史存档保留，未来可能回归</p>
+            <div class="mt-4 flex flex-wrap gap-2.5">
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">乌托邦</span>
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">方可梦</span>
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">勇者之章</span>
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">恶咒落幕曲</span>
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">香草纪元</span>
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">ATM9</span>
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">龙冒</span>
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">新星工程</span>
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">星露谷</span>
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">格雷科技</span>
+              <span class="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-slate-400">愚者</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="view-support" class="view py-24 md:py-28">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="mb-10">
+          <div class="flex items-center gap-4">
+            <div class="flex-1 h-px bg-gradient-to-r from-transparent to-white/10"></div>
+            <h2 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-300 via-sky-300 to-violet-300 bg-clip-text text-transparent">
+              支持我们
+            </h2>
+            <div class="flex-1 h-px bg-gradient-to-l from-transparent to-white/10"></div>
+          </div>
+          <p class="mt-2 text-sm text-slate-400 text-center">感谢每一位朋友的支持与鼓励</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+          <div class="glass rounded-3xl p-6 md:p-8 card-hover">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-400/20 flex items-center justify-center text-xl">🤝</span>
+              支持者
+            </h3>
+            <div id="donor-list" class="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
+            <p class="mt-6 text-center text-xs text-slate-500">每一份支持都是我们继续前行的动力</p>
+          </div>
+
+          <div class="glass rounded-3xl p-6 md:p-8 card-hover">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-xl">💬</span>
+              联系我
+            </h3>
+            <p class="mt-3 text-sm text-slate-400 leading-relaxed">遇到问题、有建议或想合作，欢迎通过以下方式联系我们：</p>
+            <div class="mt-6 space-y-3.5">
+              <a href="https://qm.qq.com/q/I3joh9uFWi" target="_blank" rel="noopener"
+                 class="flex items-center gap-3.5 rounded-xl glass-soft px-4 py-3.5 transition hover:bg-white/10 group">
+                <span class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-400/25 flex items-center justify-center text-xl shrink-0">🐧</span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-sm font-medium text-white group-hover:text-blue-200 transition">QQ 联系</span>
+                  <span class="block text-xs text-slate-500 mt-0.5">点此打开 QQ 临时会话</span>
+                </span>
+                <span class="text-slate-500 group-hover:text-white transition shrink-0">→</span>
+              </a>
+              <a href="https://qm.qq.com/q/nUTZ02uTb" target="_blank" rel="noopener"
+                 class="flex items-center gap-3.5 rounded-xl glass-soft px-4 py-3.5 transition hover:bg-white/10 group">
+                <span class="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-400/25 flex items-center justify-center text-xl shrink-0">👥</span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-sm font-medium text-white group-hover:text-violet-200 transition">QQ 群</span>
+                  <span class="block text-xs text-slate-500 mt-0.5">加入玩家交流群</span>
+                </span>
+                <span class="text-slate-500 group-hover:text-white transition shrink-0">→</span>
+              </a>
+              <a href="https://github.com/FuLingSnow" target="_blank" rel="noopener"
+                 class="flex items-center gap-3.5 rounded-xl glass-soft px-4 py-3.5 transition hover:bg-white/10 group">
+                <span class="w-10 h-10 rounded-xl bg-slate-500/15 border border-slate-400/25 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5 text-slate-200" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 015.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.42-2.7 5.39-5.27 5.68.41.35.78 1.05.78 2.12 0 1.53-.01 2.76-.01 3.13 0 .31.21.67.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+                </span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-sm font-medium text-white group-hover:text-slate-200 transition">GitHub</span>
+                  <span class="block text-xs text-slate-500 mt-0.5">github.com/FuLingSnow</span>
+                </span>
+                <span class="text-slate-500 group-hover:text-white transition shrink-0">→</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="view-player" data-backend class="view py-24 md:py-28">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="mb-8">
+          <div class="flex items-center gap-3">
+            <a href="#/" class="inline-flex items-center gap-1.5 rounded-xl glass-soft px-3.5 py-2 text-sm text-slate-200 hover:bg-white/10 transition">← 返回主页</a>
+            <div class="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent"></div>
+          </div>
+          <div class="mt-6 flex items-center gap-4">
+            <div class="flex-1 h-px bg-gradient-to-r from-transparent to-white/10"></div>
+            <h2 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-300 via-sky-300 to-violet-300 bg-clip-text text-transparent">玩家档案</h2>
+            <div class="flex-1 h-px bg-gradient-to-l from-transparent to-white/10"></div>
+          </div>
+        </div>
+        <div id="player-profile" class="glass rounded-3xl p-6 md:p-8"></div>
+      </div>
+    </section>
+
+    <section id="view-news" class="view py-24 md:py-28">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="mb-10">
+          <div class="flex items-center gap-4">
+            <div class="flex-1 h-px bg-gradient-to-r from-transparent to-white/10"></div>
+            <h2 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-300 via-sky-300 to-violet-300 bg-clip-text text-transparent">
+              更新公告
+            </h2>
+            <div class="flex-1 h-px bg-gradient-to-l from-transparent to-white/10"></div>
+          </div>
+          <p class="mt-2 text-sm text-slate-400 text-center">记录服务器每一次变化</p>
+        </div>
+        <div id="news-full" class="max-w-3xl mx-auto space-y-4"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/5 py-8">
+    <div class="max-w-6xl mx-auto px-4 text-center space-y-1.5 text-xs text-slate-500">
+      <p class="text-slate-600">© <span id="year"></span> 悠水小筑 · 祝大家游玩愉快</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

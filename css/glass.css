@@ -1,0 +1,40 @@
+.glass {
+  background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(2,6,23,.45), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.glass-soft {
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.card-hover {
+  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(34,211,238,.12), 0 8px 32px rgba(2,6,23,.5);
+  border-color: rgba(103,232,249,.25);
+}
+
+.gameplay-tile {
+  display: block;
+  color: inherit;
+  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease, background-color .3s ease;
+}
+
+.gameplay-tile:hover {
+  transform: translateY(-2px) scale(1.04);
+  border-color: rgba(103,232,249,.4);
+  background-color: rgba(255,255,255,.07);
+  box-shadow: 0 8px 28px rgba(34,211,238,.14), 0 4px 16px rgba(2,6,23,.5);
+}
+
+.text-glow-cyan { text-shadow: 0 0 18px rgba(34,211,238,.45); }
+.text-glow-violet { text-shadow: 0 0 18px rgba(167,139,250,.45); }

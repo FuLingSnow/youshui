@@ -1,0 +1,27 @@
+html { overflow-y: scroll; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,.03); }
+::-webkit-scrollbar-thumb { background: rgba(148,163,184,.3); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,.5); }
+
+.is-hidden { display: none !important; }
+
+.backend-off [data-backend] { display: none !important; }
+
+.view {
+  transition:
+    opacity .6s ease,
+    transform .6s cubic-bezier(.22, .61, .36, 1);
+  will-change: opacity, transform;
+}
+
+.view-enter {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view { transition: none; will-change: auto; }
+  .view-enter { opacity: 1; transform: none; }
+}
