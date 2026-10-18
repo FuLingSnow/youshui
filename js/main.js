@@ -1,7 +1,7 @@
 import './starfield.js';
 
 import { $, copyToClipboard } from './utils.js';
-import { BACKEND_ENABLED } from './config.js';
+import { BACKEND_ENABLED, API_BASE } from './config.js';
 import { renderNews, renderNewsFull } from './news.js';
 import { renderSupport } from './support.js';
 import { renderTeam } from './team.js';
@@ -12,8 +12,19 @@ import { renderServerCards, fillServerAddrs, fillVersionTexts } from './servers.
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
+const HEALTH_TIMEOUT = 5000;
+
 if (BACKEND_ENABLED) {
-  startBackendFeatures();
+  document.documentElement.classList.add('backend-pending');
+  probeBackend().then((ok) => {
+    document.documentElement.classList.remove('backend-pending');
+    if (ok) {
+      startBackendFeatures();
+    } else {
+      applyBackendOff();
+      renderRoute();
+    }
+  });
 } else {
   applyBackendOff();
 }
@@ -25,6 +36,17 @@ renderNews();
 renderNewsFull();
 renderSupport();
 renderTeam();
+
+async function probeBackend() {
+  try {
+    const res = await fetch(API_BASE + '/api/health', { signal: AbortSignal.timeout(HEALTH_TIMEOUT) });
+    if (!res.ok) return false;
+    const json = await res.json();
+    return !!(json && json.success === true);
+  } catch {
+    return false;
+  }
+}
 
 function startBackendFeatures() {
   queryHomeStatus();

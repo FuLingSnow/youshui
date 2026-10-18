@@ -18,6 +18,11 @@ export const ROUTES = {
 
 let hasQueried = false;
 
+function backendActive() {
+  const cls = document.documentElement.classList;
+  return BACKEND_ENABLED && !cls.contains('backend-off') && !cls.contains('backend-pending');
+}
+
 function parseAnchor() {
   const m = (location.hash || '').match(/\?a=([\w-]+)/);
   return m ? m[1] : null;
@@ -25,7 +30,7 @@ function parseAnchor() {
 
 export function currentRoute() {
   const h = location.hash || '#/';
-  if (!BACKEND_ENABLED && (h.startsWith('#/monitor') || h.startsWith('#/player'))) return 'home';
+  if (!backendActive() && (h.startsWith('#/monitor') || h.startsWith('#/player'))) return 'home';
   if (h.startsWith('#/monitor')) return 'monitor';
   if (h.startsWith('#/news')) return 'news';
   if (h.startsWith('#/guide')) return 'guide';
@@ -77,7 +82,7 @@ export function renderRoute() {
     queryDefault();
   }
 
-  if (route === 'home' && BACKEND_ENABLED) {
+  if (route === 'home' && backendActive()) {
     queryHomeStatus();
     queryHomePeak();
     queryHomeTrend();
